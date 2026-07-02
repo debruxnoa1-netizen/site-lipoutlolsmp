@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LipoutlolSMP — Serveur Minecraft Survie</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Literata:opsz,wght@18..144,400;18..144,500;18..144,600;18..144,700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void:#1B140D;
+    --wood:#6B4A2F;
+    --wood-dark:#40291A;
+    --wood-light:#8F6640;
+    --stone:#5C5C5C;
+    --stone-light:#7E7E7E;
+    --stone-dark:#333333;
+    --grass:#5C8D3A;
+    --grass-dark:#3E6127;
+    --gold:#FFC93C;
+    --gold-dark:#B8871E;
+    --sky:#6EC6FF;
+    --cream:#F3E9D2;
+    --muted:#C9BBA0;
+    --muted-2:#8F8067;
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+    *{animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important;}
+  }
+
+  body{
+    background:var(--void);
+    color:var(--cream);
+    font-family:'Literata',serif;
+    line-height:1.6;
+    overflow-x:hidden;
+  }
+
+  .pixel{font-family:'Press Start 2P',monospace;}
+
+  a{color:inherit;text-decoration:none;}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+  :focus-visible{outline:3px solid var(--gold);outline-offset:3px;}
+
+  .wrap{max-width:1180px;margin:0 auto;padding:0 32px;}
+
+  .gold-text{color:var(--gold);}
+
+  .terrain-strip{
+    height:14px;
+    background:linear-gradient(180deg, var(--grass) 0 5px, var(--wood-dark) 5px 100%);
+    background-size:14px 14px;
+    image-rendering:pixelated;
+    position:relative;
+  }
+  .terrain-strip::before{
+    content:'';
+    position:absolute;inset:0;
+    background-image:repeating-linear-gradient(90deg, rgba(0,0,0,0.15) 0 14px, transparent 14px 28px);
+  }
+
+  /* ---------- HEADER ---------- */
+  header{
+    position:sticky;top:0;z-index:50;
+    background:var(--wood-dark);
+    border-bottom:4px solid var(--stone-dark);
+  }
+  .nav{display:flex;align-items:center;justify-content:space-between;height:80px;}
+  .logo{display:flex;align-items:center;gap:12px;}
+  .logo-mark{
+    width:34px;height:34px;
+    background:var(--grass);
+    box-shadow:inset 6px 6px 0 0 rgba(255,255,255,0.3), inset -6px -6px 0 0 rgba(0,0,0,0.4);
+    image-rendering:pixelated;
+  }
+  .logo-name{font-family:'Press Start 2P',monospace;font-size:11px;color:var(--cream);letter-spacing:0.5px;}
+  .nav-links{display:flex;gap:34px;align-items:center;}
+  .nav-links a{font-size:14.5px;color:var(--muted);font-weight:500;transition:color 0.2s;}
+  .nav-links a:hover{color:var(--gold);}
+
+  .mc-btn{
+    font-family:'Press Start 2P',monospace;
+    font-size:10.5px;
+    color:var(--cream);
+    text-shadow:2px 2px 0 rgba(0,0,0,0.5);
+    background:var(--stone);
+    padding:14px 20px;
+    box-shadow:inset 3px 3px 0 0 rgba(255,255,255,0.28), inset -3px -3px 0 0 rgba(0,0,0,0.45);
+    transition:filter 0.15s, transform 0.1s;
+    display:inline-flex;align-items:center;gap:8px;
+    white-space:nowrap;
+  }
+  .mc-btn:hover{filter:brightness(1.18);}
+  .mc-btn:active{
+    transform:translateY(2px);
+    box-shadow:inset -3px -3px 0 0 rgba(255,255,255,0.15), inset 3px 3px 0 0 rgba(0,0,0,0.45);
+  }
+  .mc-btn.gold{background:var(--gold-dark);color:#3B2A05;text-shadow:none;}
+  .mc-btn.gold:hover{background:var(--gold);}
+  .mc-btn.grass{background:var(--grass-dark);}
+  .mc-btn.grass:hover{background:var(--grass);}
+
+  @media (max-width:900px){ .nav-links{display:none;} }
+
+  /* ---------- HERO ---------- */
+  .hero{
+    position:relative;
+    min-height:640px;
+    display:flex;align-items:flex-end;
+    background-image:
+      linear-gradient(180deg, rgba(27,20,13,0.35) 0%, rgba(27,20,13,0.55) 55%, var(--void) 100%),
+      url('images/gallery-9.png');
+    background-size:cover;
+    background-position:center 30%;
+  }
+  .hero-inner{padding:100px 0 70px;position:relative;width:100%;}
+  .eyebrow-badge{
+    display:inline-flex;align-items:center;gap:10px;
+    background:var(--wood-dark);
+    padding:9px 14px;
+    box-shadow:inset 2px 2px 0 rgba(255,255,255,0.2), inset -2px -2px 0 rgba(0,0,0,0.4);
+    font-size:11.5px;color:var(--cream);
+    margin-bottom:26px;
+  }
+  .status-dot{width:8px;height:8px;background:#6FE06F;box-shadow:0 0 0 2px rgba(0,0,0,0.3);animation:pulse 2s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.35;}}
+
+  .hero h1{
+    font-family:'Press Start 2P',monospace;
+    font-size:clamp(24px,4.4vw,44px);
+    line-height:1.6;
+    max-width:820px;
+    margin-bottom:22px;
+    text-shadow:4px 4px 0 rgba(0,0,0,0.55);
+  }
+  .hero p{
+    font-size:18px;color:var(--muted);max-width:520px;margin-bottom:36px;
+    text-shadow:2px 2px 4px rgba(0,0,0,0.6);
+  }
+  .hero-actions{display:flex;gap:16px;flex-wrap:wrap;}
+
+  /* ---------- SIGN (IP board) ---------- */
+  .sign-section{padding:64px 0 0;}
+  .sign{
+    max-width:620px;margin:0 auto;
+    background:var(--wood);
+    border:6px solid var(--wood-dark);
+    box-shadow:
+      inset 4px 4px 0 0 rgba(255,255,255,0.15),
+      inset -4px -4px 0 0 rgba(0,0,0,0.35),
+      0 20px 40px rgba(0,0,0,0.4);
+    padding:34px 30px;
+    text-align:center;
+    position:relative;
+    transform:translateY(-40px);
+  }
+  .sign::before, .sign::after{
+    content:'';position:absolute;top:-24px;width:6px;height:24px;background:var(--stone-dark);
+  }
+  .sign::before{left:60px;}
+  .sign::after{right:60px;}
+  .sign-label{font-family:'Press Start 2P',monospace;font-size:10px;color:var(--muted);margin-bottom:14px;letter-spacing:1px;}
+  .sign-ip{
+    font-family:'Press Start 2P',monospace;
+    font-size:clamp(16px,3vw,24px);
+    color:var(--gold);
+    margin-bottom:22px;
+    word-break:break-all;
+    text-shadow:2px 2px 0 rgba(0,0,0,0.4);
+  }
+
+  /* ---------- STATS ---------- */
+  .stats{background:var(--stone-dark);border-top:4px solid var(--wood-dark);border-bottom:4px solid var(--wood-dark);}
+  .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);}
+  .stat{padding:30px 24px;border-right:2px solid rgba(255,255,255,0.06);text-align:center;}
+  .stat:last-child{border-right:none;}
+  .stat-num{font-family:'Press Start 2P',monospace;font-size:22px;color:var(--gold);}
+  .stat-label{font-size:13px;color:var(--muted);margin-top:10px;}
+  @media (max-width:760px){
+    .stats-grid{grid-template-columns:repeat(2,1fr);}
+    .stat{border-bottom:2px solid rgba(255,255,255,0.06);}
+  }
+
+  /* ---------- SECTIONS ---------- */
+  section{padding:100px 0;}
+  .section-head{max-width:600px;margin-bottom:56px;}
+  .section-eyebrow{font-family:'Press Start 2P',monospace;font-size:10px;color:var(--gold);margin-bottom:16px;}
+  .section-head h2{font-family:'Literata',serif;font-weight:700;font-size:clamp(26px,3.6vw,38px);margin-bottom:14px;color:var(--cream);}
+  .section-head p{color:var(--muted);font-size:16.5px;}
+
+  /* ---------- CRAFTING GRID ---------- */
+  .craft-wrap{display:grid;grid-template-columns:290px 1fr;gap:56px;align-items:start;}
+  @media (max-width:900px){ .craft-wrap{grid-template-columns:1fr;} }
+  .craft-table{
+    background:var(--wood);
+    border:5px solid var(--wood-dark);
+    box-shadow:inset 3px 3px 0 rgba(255,255,255,0.15), inset -3px -3px 0 rgba(0,0,0,0.35);
+    padding:16px;
+    display:grid;grid-template-columns:repeat(3,80px);grid-template-rows:repeat(3,80px);
+    gap:6px;justify-content:center;margin:0 auto;
+  }
+  .slot{
+    background:#8B8B8B;
+    box-shadow:inset -3px -3px 0 0 rgba(0,0,0,0.45), inset 3px 3px 0 0 rgba(255,255,255,0.35);
+    display:flex;align-items:center;justify-content:center;
+    font-size:30px;
+    transition:filter 0.15s, transform 0.1s;
+  }
+  .slot:hover, .slot:focus-visible{filter:brightness(1.15);}
+  .slot.active{
+    box-shadow:inset -3px -3px 0 0 rgba(0,0,0,0.45), inset 3px 3px 0 0 rgba(255,255,255,0.35), 0 0 0 3px var(--gold);
+  }
+
+  .feature-detail{
+    background:var(--wood-dark);
+    border:4px solid var(--stone-dark);
+    box-shadow:inset 2px 2px 0 rgba(255,255,255,0.08);
+    padding:34px;
+    min-height:210px;
+  }
+  .feature-detail .tag{font-family:'Press Start 2P',monospace;font-size:10px;color:var(--gold);margin-bottom:16px;display:block;}
+  .feature-detail h3{font-size:22px;font-weight:700;margin-bottom:12px;color:var(--cream);}
+  .feature-detail p{color:var(--muted);font-size:15.5px;max-width:480px;}
+
+  /* ---------- GALLERY ---------- */
+  .gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+  @media (max-width:900px){ .gallery-grid{grid-template-columns:repeat(2,1fr);} }
+  @media (max-width:600px){ .gallery-grid{grid-template-columns:1fr;} }
+  .gallery-item{
+    position:relative;aspect-ratio:16/10;overflow:hidden;
+    border:4px solid var(--wood-dark);
+    box-shadow:inset 2px 2px 0 rgba(255,255,255,0.1);
+  }
+  .gallery-item img{width:100%;height:100%;object-fit:cover;display:block;transition:transform 0.5s ease;}
+  .gallery-item:hover img{transform:scale(1.07);}
+  .gallery-item .cap{
+    position:absolute;left:0;right:0;bottom:0;
+    padding:14px 16px;
+    background:linear-gradient(0deg, rgba(27,20,13,0.92), transparent);
+    font-size:13px;color:var(--cream);font-weight:600;
+    opacity:0;transform:translateY(6px);
+    transition:opacity 0.3s, transform 0.3s;
+  }
+  .gallery-item:hover .cap{opacity:1;transform:translateY(0);}
+
+  /* ---------- STEPS ---------- */
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+  @media (max-width:800px){ .steps{grid-template-columns:1fr;} }
+  .step{
+    background:var(--wood);
+    border:4px solid var(--wood-dark);
+    box-shadow:inset 3px 3px 0 rgba(255,255,255,0.12), inset -3px -3px 0 rgba(0,0,0,0.3);
+    padding:34px 28px;
+  }
+  .step-num{font-family:'Press Start 2P',monospace;font-size:13px;color:var(--gold);margin-bottom:20px;}
+  .step h3{font-size:18px;font-weight:700;margin-bottom:10px;color:var(--cream);}
+  .step p{color:var(--muted);font-size:14.5px;}
+  .step code{
+    display:block;margin-top:16px;
+    font-family:'Press Start 2P',monospace;
+    font-size:10.5px;color:var(--gold);
+    background:var(--wood-dark);
+    padding:12px 12px;
+    word-break:break-all;
+  }
+
+  /* ---------- DISCORD CTA ---------- */
+  .cta-band{background:var(--grass-dark);border-top:4px solid var(--wood-dark);border-bottom:4px solid var(--wood-dark);position:relative;}
+  .cta-inner{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:28px;padding:76px 0;}
+  .cta-inner h2{font-size:26px;font-weight:700;margin-bottom:10px;color:#fff;}
+  .cta-inner p{color:rgba(255,255,255,0.8);font-size:15.5px;}
+
+  /* ---------- FOOTER ---------- */
+  footer{padding:52px 0 40px;background:var(--wood-dark);}
+  .footer-grid{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:32px;margin-bottom:36px;}
+  .footer-ip{font-size:14px;color:var(--muted);}
+  .footer-ip strong{color:var(--gold);font-family:'Press Start 2P',monospace;font-size:11px;}
+  .footer-links{display:flex;gap:26px;}
+  .footer-links a{font-size:14px;color:var(--muted);transition:color 0.2s;}
+  .footer-links a:hover{color:var(--gold);}
+  .footer-bottom{font-size:12.5px;color:var(--muted-2);padding-top:22px;border-top:2px solid rgba(255,255,255,0.08);}
+
+  .copied-toast{
+    position:fixed;bottom:28px;left:50%;
+    transform:translateX(-50%) translateY(20px);
+    background:var(--stone);
+    box-shadow:inset 3px 3px 0 rgba(255,255,255,0.25), inset -3px -3px 0 rgba(0,0,0,0.4);
+    color:var(--cream);
+    padding:14px 22px;
+    font-family:'Press Start 2P',monospace;
+    font-size:10.5px;
+    opacity:0;
+    transition:opacity 0.25s, transform 0.25s;
+    pointer-events:none;
+    z-index:100;
+  }
+  .copied-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <div class="logo">
+      <div class="logo-mark"></div>
+      <span class="logo-name">Lipoutlol<span class="gold-text">SMP</span></span>
+    </div>
+    <nav class="nav-links">
+      <a href="#fonctionnalites">Fonctionnalités</a>
+      <a href="#galerie">Galerie</a>
+      <a href="#rejoindre">Rejoindre</a>
+      <a href="#discord">Discord</a>
+    </nav>
+    <button class="mc-btn" id="copyIpTop">Copier l'IP</button>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="wrap hero-inner">
+    <div class="eyebrow-badge"><span class="status-dot"></span> Serveur en ligne — Toutes versions</div>
+    <h1>Un monde de survie qui t'appartient</h1>
+    <p>Un serveur Minecraft survie multijoueur, construit à la main par sa communauté depuis le premier jour. Économie, terres protégées, et une ville marchande qui ne demande qu'à s'agrandir.</p>
+    <div class="hero-actions">
+      <button class="mc-btn gold" id="copyIpHero">▶ Copier l'IP et jouer</button>
+      <a href="#discord" class="mc-btn grass">Rejoindre le Discord</a>
+    </div>
+  </div>
+</div>
+
+<div class="sign-section wrap">
+  <div class="sign">
+    <div class="sign-label">— ADRESSE DU SERVEUR —</div>
+    <div class="sign-ip">lipoutlolsmp-98a8a7a8.game-nodes-pve6.aclclouds.online:30090</div>
+    <button class="mc-btn" id="copyIpSign">Copier</button>
+  </div>
+</div>
+
+<div class="stats">
+  <div class="wrap stats-grid">
+    <div class="stat"><div class="stat-num">120+</div><div class="stat-label">Joueurs actifs</div></div>
+    <div class="stat"><div class="stat-num">99.9%</div><div class="stat-label">Uptime</div></div>
+    <div class="stat"><div class="stat-num">TOUTES</div><div class="stat-label">Versions supportées</div></div>
+    <div class="stat"><div class="stat-num">24/7</div><div class="stat-label">Serveur ouvert</div></div>
+  </div>
+</div>
+
+
+
+<div class="terrain-strip"></div>
+
+<section id="galerie">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="section-eyebrow">LE MONDE</div>
+      <h2>Construit par la communauté</h2>
+      <p>Un aperçu du spawn et de la ville marchande, entièrement bâtis par les joueurs.</p>
+    </div>
+    <div class="gallery-grid">
+      <div class="gallery-item"><img src="images/gallery-1.png" alt="Allée du spawn menant à la place centrale"><div class="cap">L'entrée du spawn</div></div>
+      <div class="gallery-item"><img src="images/gallery-2.png" alt="Grand temple de pierre à l'entrée"><div class="cap">Le temple d'accueil</div></div>
+      <div class="gallery-item"><img src="images/gallery-3.png" alt="Stand des marchands"><div class="cap">Le quartier des marchands</div></div>
+      <div class="gallery-item"><img src="images/gallery-5.png" alt="Échoppe au toit turquoise"><div class="cap">Une échoppe du marché</div></div>
+      <div class="gallery-item"><img src="images/gallery-7.png" alt="Échoppe au toit jaune"><div class="cap">Ambiance coucher de soleil</div></div>
+      <div class="gallery-item"><img src="images/gallery-10.png" alt="Rue marchande avec lanternes"><div class="cap">La rue marchande</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="rejoindre">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="section-eyebrow">REJOINDRE</div>
+      <h2>En jeu en moins de deux minutes</h2>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <h3>Ouvre Minecraft</h3>
+        <p>Lance le jeu, peu importe ta version — le serveur accepte toutes les versions Java.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <h3>Ajoute le serveur</h3>
+        <p>Clique sur "Ajouter un serveur" et colle l'adresse ci-dessous.</p>
+        <code>lipoutlolsmp-98a8a7a8.game-nodes-pve6.aclclouds.online:30090</code>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <h3>Connecte-toi</h3>
+        <p>Double-clique sur le serveur dans la liste et commence ton aventure.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="cta-band" id="discord">
+  <div class="wrap cta-inner">
+    <div>
+      <h2>Rejoins la communauté</h2>
+      <p>Annonces, entraide, et une place pour montrer tes constructions.</p>
+    </div>
+    <a href="https://discord.gg/w2JGtJEPgQ" target="_blank" rel="noopener" class="mc-btn gold">Rejoindre le Discord →</a>
+  </div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <div class="logo" style="margin-bottom:14px;">
+          <div class="logo-mark"></div>
+          <span class="logo-name">Lipoutlol<span class="gold-text">SMP</span></span>
+        </div>
+        <div class="footer-ip">IP : <strong>lipoutlolsmp-98a8a7a8.game-nodes-pve6.aclclouds.online:30090</strong></div>
+      </div>
+      <div class="footer-links">
+        <a href="#fonctionnalites">Fonctionnalités</a>
+        <a href="#galerie">Galerie</a>
+        <a href="#rejoindre">Rejoindre</a>
+        <a href="https://discord.gg/w2JGtJEPgQ" target="_blank" rel="noopener">Discord</a>
+      </div>
+    </div>
+    <div class="footer-bottom">© 2026 LipoutlolSMP. Serveur communautaire non affilié à Mojang ou Microsoft.</div>
+  </div>
+</footer>
+
+<div class="copied-toast" id="toast">IP copiée ✓</div>
+
+<script>
+  const IP = "lipoutlolsmp-98a8a7a8.game-nodes-pve6.aclclouds.online:30090";
+  const toast = document.getElementById('toast');
+  function copyIp(){
+    navigator.clipboard.writeText(IP).then(()=>{
+      toast.classList.add('show');
+      setTimeout(()=> toast.classList.remove('show'), 2200);
+    });
+  }
+  document.getElementById('copyIpTop').addEventListener('click', copyIp);
+  document.getElementById('copyIpHero').addEventListener('click', copyIp);
+  document.getElementById('copyIpSign').addEventListener('click', copyIp);
+
+  const features = [
+    { tag:"// 01 — SURVIE PURE", title:"Survie vanilla renforcée", text:"Gameplay proche de la survie classique, avec quelques ajustements pour un serveur multijoueur équilibré. Pas de pay-to-win, pas de raccourcis." },
+    { tag:"// 02 — ÉCONOMIE", title:"Économie vivante", text:"Gagne, dépense et échange grâce à un système monétaire complet lié à un shop et au commerce entre joueurs." },
+    { tag:"// 03 — PROTECTION", title:"Terres protégées", text:"Claim ton terrain pour protéger tes constructions du grief et des autres joueurs." },
+    { tag:"// 04 — PVP", title:"Zones de combat", text:"Des zones dédiées au PVP pour ceux qui veulent tester leur équipement et leur skill." },
+    { tag:"// 05 — GRADES", title:"Progression par grades", text:"Monte en grade au fil de ton implication et débloque de nouveaux avantages sur le serveur." },
+    { tag:"// 06 — CONSTRUCTION", title:"Monde généré à l'infini", text:"Un monde survie classique, sans limites artificielles, pour construire aussi loin que tu veux explorer." },
+    { tag:"// 07 — MONTURES", title:"Élevage et montures", text:"Élève des animaux, apprivoise des montures et développe ton propre domaine." },
+    { tag:"// 08 — COMMUNAUTÉ", title:"Chat actif et Discord lié", text:"Un chat en jeu connecté au Discord pour ne rien manquer, même hors ligne." },
+    { tag:"// 09 — ÉVÉNEMENTS", title:"Events réguliers", text:"Des mini-jeux et événements communautaires organisés régulièrement avec des récompenses." },
+  ];
+  const slots = document.querySelectorAll('.slot');
+  const detail = document.getElementById('featureDetail');
+  slots.forEach(slot=>{
+    slot.addEventListener('click', ()=>{
+      slots.forEach(s=>s.classList.remove('active'));
+      slot.classList.add('active');
+      const f = features[slot.dataset.i];
+      detail.querySelector('.tag').textContent = f.tag;
+      detail.querySelector('h3').textContent = f.title;
+      detail.querySelector('p').textContent = f.text;
+    });
+  });
+</script>
+
+</body>
+</html>
